@@ -4,11 +4,10 @@ using SearchRank.Domain.Models;
 
 namespace SearchRank.Application.SearchEngine.Queries;
 
-public class SearchEngineQuery(string keyword, string targetUrl, Guid userId) : IRequest<OneOf<SearchEngineQuery.ResultModel, Error>>
+public class SearchEngineQuery(string keyword, string targetUrl) : IRequest<OneOf<SearchEngineQuery.ResultModel, Error>>
 {
     public string Keyword { get; set; } = keyword;
     public string TargetUrl { get; set; } = targetUrl;
-    public Guid UserId { get; set; } = userId;
 
     public class ResultModel
     {

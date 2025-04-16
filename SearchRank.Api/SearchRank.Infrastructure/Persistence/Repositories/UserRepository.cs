@@ -6,5 +6,8 @@ namespace SearchRank.Infrastructure.Persistence.Repositories;
 
 public class UserRepository(AppDbContext dbContext) : IUserRepository
 {
-    public async Task<User?> GetUserByEmailAsync(string email) => await dbContext.Set<User>().AsNoTracking().FirstOrDefaultAsync(p => p.Email == email);
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await dbContext.Set<User>().AsNoTracking().FirstOrDefaultAsync(p => p.Email == email);
+    }
 }

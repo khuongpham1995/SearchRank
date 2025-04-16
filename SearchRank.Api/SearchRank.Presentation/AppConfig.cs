@@ -2,9 +2,9 @@
 
 public class AppConfig
 {
-    public ApiAction ApiAction { get; set; } = new ApiAction();
-    public JwtSettings JwtSettings { get; set; } = new JwtSettings();
-    public RateLimiterSettings RateLimiter { get; set; } = new RateLimiterSettings();
+    public ApiAction ApiAction { get; set; } = new();
+    public JwtSettings JwtSettings { get; set; } = new();
+    public RateLimiterSettings RateLimiter { get; set; } = new();
 }
 
 public class JwtSettings
@@ -25,5 +25,5 @@ public class ApiAction
 {
     public string Grouping { get; set; } = string.Empty;
     public string Token { get; set; } = string.Empty;
-    public string Searching { get; set; } = string.Empty;
+    public string Ranking { get; set; } = string.Empty;
 }

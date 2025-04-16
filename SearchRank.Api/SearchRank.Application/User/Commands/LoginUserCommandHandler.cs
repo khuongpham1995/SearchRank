@@ -11,9 +11,11 @@ public class LoginUserCommandHandler(
     IUserRepository repository,
     IJwtGenerator jwtGenerator,
     IPasswordGenerator passwordGenerator,
-    ILogger<LoginUserCommandHandler> logger) : IRequestHandler<LoginUserCommand, OneOf<LoginUserCommand.ResultModel, Error>>
+    ILogger<LoginUserCommandHandler> logger)
+    : IRequestHandler<LoginUserCommand, OneOf<LoginUserCommand.ResultModel, Error>>
 {
-    public async Task<OneOf<LoginUserCommand.ResultModel, Error>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<OneOf<LoginUserCommand.ResultModel, Error>> Handle(LoginUserCommand request,
+        CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling LoginUserCommand for Email: {Email}", request.Email);
 
@@ -40,6 +42,6 @@ public class LoginUserCommandHandler(
         var token = jwtGenerator.GenerateToken(user);
         logger.LogInformation("JWT token generated for user: {Email}", request.Email);
 
-        return new LoginUserCommand.ResultModel { Token = token, UserId = user.Id };
+        return new LoginUserCommand.ResultModel { Token = token };
     }
 }

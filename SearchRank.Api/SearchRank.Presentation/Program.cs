@@ -1,3 +1,5 @@
+using System.Text;
+using System.Threading.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
@@ -9,22 +11,20 @@ using SearchRank.Infrastructure.Persistence;
 using SearchRank.Presentation;
 using SearchRank.Presentation.Requests;
 using SearchRank.Presentation.Responses;
-using System.Text;
-using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", true, true)
-                    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
-                    .AddEnvironmentVariables().Build();
+    .AddJsonFile("appsettings.json", true, true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
+    .AddEnvironmentVariables().Build();
 var appConfig = builder.Configuration.Get<AppConfig>()!;
 builder.Services.AddInfrastructure();
 builder.Services.AddApplication();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo 
-    { 
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
         Title = "Search Rank API",
         Version = "v1"
     });
@@ -96,24 +96,24 @@ using (var scope = app.Services.CreateScope())
 var group = app.MapGroup(appConfig.ApiAction.Grouping);
 
 group.MapPost(appConfig.ApiAction.Token, async (LoginRequest loginRequest, ISender sender) =>
-{
-    var response = await sender.Send(loginRequest.ToCommand());
-    return response.Match(result => Results.Ok(result.ToResponse()), error => Results.BadRequest(error.Message));
-})
-.WithTags("Bearer Token")
-.Produces<LoginResponse>(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status400BadRequest)
-.RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
+    {
+        var response = await sender.Send(loginRequest.ToCommand());
+        return response.Match(result => Results.Ok(result.ToResponse()), error => Results.BadRequest(error.Message));
+    })
+    .WithTags("Bearer Token")
+    .Produces<LoginResponse>()
+    .Produces(StatusCodes.Status400BadRequest)
+    .RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
 
-group.MapPost(appConfig.ApiAction.Searching, async (SearchRequest request, ISender sender) =>
-{
-    var response = await sender.Send(request.ToQuery());
-    return response.Match(result => Results.Ok(result.ToResponse()), _ => Results.NoContent());
-})
-.WithTags("Search Rank")
-.Produces<SearchResponse>(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status204NoContent)
-.RequireAuthorization()
-.RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
+group.MapGet(appConfig.ApiAction.Ranking, async ([AsParameters] SearchRequest request, ISender sender) =>
+    {
+        var response = await sender.Send(request.ToQuery());
+        return response.Match(result => Results.Ok(result.ToResponse()), _ => Results.NoContent());
+    })
+    .WithTags("Search Engine Ranking")
+    .Produces<SearchResponse>()
+    .Produces(StatusCodes.Status204NoContent)
+    .RequireAuthorization()
+    .RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
 
 app.Run();

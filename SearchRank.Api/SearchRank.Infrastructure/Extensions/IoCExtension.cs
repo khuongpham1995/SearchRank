@@ -13,11 +13,11 @@ public static class IoCExtension
     {
         services.AddDbContextPool<AppDbContext>(options => { options.UseInMemoryDatabase("TestingMemoryDb"); });
         services.AddMemoryCache();
+        services.AddHttpClient();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IQueryLogRepository, QueryLogRepository>();
         services.AddTransient<IJwtGenerator, JwtGenerator>();
         services.AddTransient<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<ICacheService, MemoryCacheService>();
-        services.AddHttpClient<ISearchEngineService, SearchEngineService>();
+        services.AddTransient<ISearchEngineService, SearchEngineService>();
     }
 }

@@ -7,15 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="MediatR" Version="12.5.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.3" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.3" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3" />
-      <PackageReference Include="OneOf" Version="3.0.271" />
+        <PackageReference Include="MediatR" Version="12.5.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.3"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.3"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.3"/>
+        <PackageReference Include="OneOf" Version="3.0.271"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SearchRank.Domain\SearchRank.Domain.csproj" />
+        <ProjectReference Include="..\SearchRank.Domain\SearchRank.Domain.csproj"/>
     </ItemGroup>
 
 </Project>

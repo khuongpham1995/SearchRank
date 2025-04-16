@@ -13,17 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasIndex(x => x.Email).IsUnique();
             entity.Property(p => p.RowVersion).IsRowVersion().IsConcurrencyToken();
         });
-        
-        modelBuilder.Entity<SearchQuery>(entity =>
-        {
-            entity.HasKey(x => x.Id);
-            entity.HasOne(x => x.User)
-                .WithMany(x => x.SearchQueries)
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.Property(p => p.RowVersion).IsRowVersion().IsConcurrencyToken();
-        });
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }

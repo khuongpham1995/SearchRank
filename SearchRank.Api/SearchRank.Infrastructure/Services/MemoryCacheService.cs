@@ -11,7 +11,7 @@ public class MemoryCacheService(IMemoryCache memoryCache) : ICacheService
     {
         return _memoryCache.TryGetValue(key, out value);
     }
-    
+
     public void Set<T>(string key, T value, TimeSpan absoluteExpirationRelativeToNow)
     {
         var options = new MemoryCacheEntryOptions
@@ -21,7 +21,7 @@ public class MemoryCacheService(IMemoryCache memoryCache) : ICacheService
 
         _memoryCache.Set(key, value, options);
     }
-    
+
     public void Remove(string key)
     {
         _memoryCache.Remove(key);

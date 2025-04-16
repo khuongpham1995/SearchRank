@@ -12,7 +12,7 @@ public static class ValidationExtension
         var emailAttribute = new EmailAddressAttribute();
         return emailAttribute.IsValid(email);
     }
-    
+
     public static bool IsPaginationValid(int currentPage, int pageSize)
     {
         return currentPage >= 1 && pageSize >= 1;

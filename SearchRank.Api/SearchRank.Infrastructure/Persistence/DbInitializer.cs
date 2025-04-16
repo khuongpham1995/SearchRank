@@ -11,11 +11,8 @@ public static class DbInitializer
         await context.Database.EnsureCreatedAsync();
         const string demoEmail = "test-user@gmail.com";
         var isExisting = await context.Set<User>().AnyAsync(u => u.Email.Equals(demoEmail));
-        if (isExisting)
-        {
-            return;
-        }
-        
+        if (isExisting) return;
+
         var passwordService = new PasswordGenerator();
         await context.Set<User>().AddAsync(new User
         {

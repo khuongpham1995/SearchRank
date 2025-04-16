@@ -4,7 +4,6 @@ namespace SearchRank.Domain.Interfaces;
 
 public interface IUserRepository
 {
-    
     /// <summary>
     ///     Retrieves a user by their email address.
     /// </summary>

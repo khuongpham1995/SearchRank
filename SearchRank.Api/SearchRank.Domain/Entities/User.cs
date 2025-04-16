@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using SearchRank.Domain.Interfaces;
 
 namespace SearchRank.Domain.Entities;
 
@@ -10,7 +9,7 @@ public class User
         Id = Guid.NewGuid();
         CreatedAt = DateTime.Now;
     }
-    
+
     public Guid Id { get; set; }
     public string Email { get; set; } = null!;
     public string FirstName { get; set; }
@@ -20,10 +19,4 @@ public class User
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
     [Timestamp] public byte[] RowVersion { get; set; } = [];
-    
-    #region Navigations
-
-    public ICollection<SearchQuery> SearchQueries { get; set; } =  [];
-
-    #endregion
 }
