@@ -8,6 +8,6 @@ public static class LoginRequestExtensions
 {
     public static LoginUserCommand ToCommand(this LoginRequest input)
     {
-        return new LoginUserCommand(input.Email, input.Password);
+        return new LoginUserCommand { Email = input.Email, Password = input.Password };
     }
 }

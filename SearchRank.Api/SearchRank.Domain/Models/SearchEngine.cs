@@ -1,8 +1,9 @@
 using SearchRank.Domain.Enums;
 
 namespace SearchRank.Domain.Models;
-public class SearchEngineModel
+
+public class SearchEngine
 {
-    public SearchEngineType SearchEngine { get; set; }
+    public SearchEngineType Type { get; set; }
     public int? Rank { get; set; }
 }

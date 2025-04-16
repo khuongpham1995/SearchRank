@@ -1,22 +1,25 @@
-using System.Text;
-using System.Threading.RateLimiting;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SearchRank.Application.Extensions;
+using SearchRank.Domain.Constants;
 using SearchRank.Infrastructure.Extensions;
 using SearchRank.Infrastructure.Persistence;
 using SearchRank.Presentation;
 using SearchRank.Presentation.Requests;
+using SearchRank.Presentation.Responses;
+using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", true, true)
+                    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true, true)
+                    .AddEnvironmentVariables().Build();
+var appConfig = builder.Configuration.Get<AppConfig>()!;
 builder.Services.AddInfrastructure();
 builder.Services.AddApplication();
-
-// Add this before Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -58,56 +61,59 @@ builder.Services.AddAuthentication("Bearer")
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]!)),
+                Encoding.UTF8.GetBytes(appConfig.JwtSettings.SecretKey)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidIssuer = appConfig.JwtSettings.Issuer,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            ValidAudience = appConfig.JwtSettings.Audience,
             ClockSkew = TimeSpan.Zero
         };
     });
 
 builder.Services.AddRateLimiter(rl => rl
-    .AddFixedWindowLimiter(ApplicationConstants.FixedRateLimitingPolicy, options =>
+    .AddFixedWindowLimiter(CommonConstant.FixedRateLimitingPolicy, options =>
     {
-        options.PermitLimit = Convert.ToInt32(builder.Configuration["RateLimiter:PermitLimit"]);
-        options.Window = TimeSpan.FromSeconds(Convert.ToInt32(builder.Configuration["RateLimiter:FixedWindowSecond"]));
+        options.PermitLimit = Convert.ToInt32(appConfig.RateLimiter.PermitLimit);
+        options.Window = TimeSpan.FromSeconds(Convert.ToInt32(appConfig.RateLimiter.FixedWindowSecond));
         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        options.QueueLimit = Convert.ToInt32(builder.Configuration["RateLimiter:QueueLimit"]);
+        options.QueueLimit = Convert.ToInt32(appConfig.RateLimiter.QueueLimit);
     }).RejectionStatusCode = StatusCodes.Status429TooManyRequests);
 
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-});
+app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/search-rank.json", "v1"); });
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
-// Initialize the database (if applicable)
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await DbInitializer.InitializeAsync(context);
 }
 
-var group = app.MapGroup("/api");
+var group = app.MapGroup(appConfig.ApiAction.Grouping);
 
-group.MapPost("/token", async (LoginRequest loginRequest, ISender mediator) =>
+group.MapPost(appConfig.ApiAction.Token, async (LoginRequest loginRequest, ISender sender) =>
 {
-    var response = await mediator.Send(loginRequest.ToCommand());
-    return response.Match(token => Results.Ok(new { Token = token }), error => Results.BadRequest(error.Message));
-}).WithTags("Bearer Token").RequireRateLimiting(ApplicationConstants.FixedRateLimitingPolicy);
+    var response = await sender.Send(loginRequest.ToCommand());
+    return response.Match(result => Results.Ok(result.ToResponse()), error => Results.BadRequest(error.Message));
+})
+.WithTags("Bearer Token")
+.Produces<LoginResponse>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status400BadRequest)
+.RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
 
-group.MapPost("/searching", async (SearchRequest request, IMediator mediator) =>
+group.MapPost(appConfig.ApiAction.Searching, async (SearchRequest request, ISender sender) =>
 {
-    var response = await mediator.Send(request.ToQuery());
-    return response.Match(Results.Ok, _ => Results.NoContent());
+    var response = await sender.Send(request.ToQuery());
+    return response.Match(result => Results.Ok(result.ToResponse()), _ => Results.NoContent());
 })
 .WithTags("Search Rank")
+.Produces<SearchResponse>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status204NoContent)
 .RequireAuthorization()
-.RequireRateLimiting(ApplicationConstants.FixedRateLimitingPolicy);;
+.RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
 
 app.Run();

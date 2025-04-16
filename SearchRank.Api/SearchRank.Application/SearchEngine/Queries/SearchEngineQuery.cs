@@ -14,7 +14,7 @@ public class SearchEngineQuery(string keyword, string targetUrl, Guid userId) : 
     {
         public required string Keyword { get; set; }
         public required string TargetUrl { get; set; }
-        public List<SearchEngineModel> Results { get; set; } = [];
+        public List<Domain.Models.SearchEngine> Results { get; set; } = [];
         public DateTimeOffset Timestamp { get; set; }
     }
 }

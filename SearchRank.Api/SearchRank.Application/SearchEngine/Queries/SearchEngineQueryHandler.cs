@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OneOf;
+using SearchRank.Domain.Constants;
 using SearchRank.Domain.Entities;
 using SearchRank.Domain.Enums;
 using SearchRank.Domain.Interfaces;
@@ -9,37 +10,33 @@ using SearchRank.Domain.Models;
 namespace SearchRank.Application.SearchEngine.Queries;
 
 public class SearchEngineQueryHandler(
-    IGoogleSearchService googleSearchService,
-    IBingSearchService bingSearchService,
+    ISearchEngineService searchEngineService,
     ICacheService cacheService,
     IQueryLogRepository queryLogRepository,
     ILogger<SearchEngineQueryHandler> logger)
     : IRequestHandler<SearchEngineQuery, OneOf<SearchEngineQuery.ResultModel, Error>>
 {
-    private const string GoogleCacheKey = "Google-Cache-Key:{0}";
-    private const string BingCacheKey = "Bing-Cache-Key:{1}";
+    private const string CacheKey = "{0}-Cache-Key-{1}-{2}-{3}";
     
     public async Task<OneOf<SearchEngineQuery.ResultModel, Error>> Handle(SearchEngineQuery request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Processing search query for keyword: {Keyword}, targetUrl: {TargetUrl}", request.Keyword, request.TargetUrl);
-        
-        var googleResults = await GetGoogleResultAsync(request.Keyword);
-        var bingResults =  await GetBingResultAsync(request.Keyword);
+
+        var googleTask = GetGoogleResultAsync(request.UserId, request.Keyword, request.TargetUrl);
+        var bingTask = GetBingResultAsync(request.UserId, request.Keyword, request.TargetUrl);
+        await Task.WhenAll(new List<Task> { googleTask, bingTask });
+        var googleResults = await googleTask;
+        var bingResults = await bingTask;
 
         logger.LogInformation("Retrieved {GoogleCount} results from Google and {BingCount} results from Bing.", googleResults?.Count, bingResults?.Count);
         
-        var googleRank = FindRank(googleResults, request.TargetUrl);
-        var bingRank = FindRank(bingResults, request.TargetUrl);
+        var googleRank = FindRank(googleResults);
+        var bingRank = FindRank(bingResults);
         
         logger.LogInformation("Search rank determined. Google: {GoogleRank}, Bing: {BingRank}", googleRank, bingRank);
         
-        var searchQuery = new SearchQuery
+        var searchQuery = new SearchQuery(request.Keyword, request.TargetUrl, request.UserId)
         {
-            Id = Guid.NewGuid(),
-            Keyword = request.Keyword,
-            TargetUrl = request.TargetUrl,
-            UserId = request.UserId,
-            CreatedAt = DateTime.UtcNow,
             GoogleRank = googleRank,
             BingRank = bingRank
         };
@@ -54,62 +51,40 @@ public class SearchEngineQueryHandler(
             Timestamp = searchQuery.CreatedAt,
             Results =
             [
-                new SearchEngineModel { SearchEngine = SearchEngineType.Google, Rank = googleRank },
-                new SearchEngineModel { SearchEngine = SearchEngineType.Bing, Rank = bingRank }
+                new Domain.Models.SearchEngine { Type = SearchEngineType.Google, Rank = googleRank },
+                new Domain.Models.SearchEngine { Type = SearchEngineType.Bing, Rank = bingRank }
             ]
         };
     }
     
     #region Private Method(s)
 
-    private async Task<ICollection<string>?> GetGoogleResultAsync(string keyword)
+    private async Task<ICollection<int>?> GetGoogleResultAsync(Guid userId, string keyword, string targetUrl)
     {
-        if (cacheService.TryGetValue(GoogleCacheKey, out ICollection<string>? result)) return result;
-        result = await googleSearchService.SearchAsync(keyword);
-        cacheService.Set(GoogleCacheKey, result, TimeSpan.FromMinutes(30));
+        var cacheKey = string.Format(CacheKey, SearchEngineType.Google, userId, keyword, targetUrl);
+        if (cacheService.TryGetValue(cacheKey, out ICollection<int>? result)) return result;
+        result = await searchEngineService.SearchGoogleAsync(keyword, targetUrl);
+        cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(CommonConstant.CacheExpireMinute));
         return result;
     }
     
-    private async Task<ICollection<string>?> GetBingResultAsync(string keyword)
+    private async Task<ICollection<int>?> GetBingResultAsync(Guid userId, string keyword, string targetUrl)
     {
-        if (cacheService.TryGetValue(BingCacheKey, out ICollection<string>? result)) return result;
-        result = await bingSearchService.SearchAsync(keyword);
-        cacheService.Set(BingCacheKey, result, TimeSpan.FromMinutes(30));
+        var cacheKey = string.Format(CacheKey, SearchEngineType.Bing, userId, keyword, targetUrl);
+        if (cacheService.TryGetValue(cacheKey, out ICollection<int>? result)) return result;
+        result = await searchEngineService.SearchBingAsync(keyword, targetUrl, resultsPerPage: 25);
+        cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(CommonConstant.CacheExpireMinute));
         return result;
     }
-    
+
     /// <summary>
-    /// Finds the ranking position of the target URL in a sequence of search result URLs.
+    /// Determines the best ranking (lowest ranking value) from a collection of ranking positions.
     /// </summary>
-    /// <param name="searchResults">A sequence of URLs from search results.</param>
-    /// <param name="targetUrl">The target URL to locate.</param>
+    /// <param name="searchResults">A collection of ranking positions (1-indexed) returned from a search engine.</param>
     /// <returns>
-    /// The 1-indexed rank if found; otherwise, null.
+    /// The minimum ranking value if available; otherwise, null.
     /// </returns>
-    private static int? FindRank(ICollection<string>? searchResults, string targetUrl)
-    {
-        if (searchResults == null) return null;
-        
-        var index = 1;
-        foreach (var url in searchResults)
-        {
-            if (NormalizeUrl(url) == NormalizeUrl(targetUrl))
-            {
-                return index;
-            }
+    private static int? FindRank(ICollection<int>? searchResults) => searchResults?.Any() == true ? searchResults.Min() : null;
 
-            index++;
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// Normalizes the URL for comparison, such as by trimming and converting to lowercase.
-    /// </summary>
-    /// <param name="url">The URL to normalize.</param>
-    /// <returns>A normalized URL string.</returns>
-    private static string NormalizeUrl(string url) => url.Trim().ToLowerInvariant();
-    
     #endregion
 }
