@@ -50,19 +50,19 @@ public class SearchEngineQueryHandler(
 
     #region Private Method(s)
 
-    private async Task<ICollection<int>?> GetGoogleResultAsync(string keyword, string targetUrl)
+    private async Task<IReadOnlyCollection<int>?> GetGoogleResultAsync(string keyword, string targetUrl)
     {
         var cacheKey = string.Format(CommonConstant.CacheKeyFormat, SearchEngineType.Google, keyword, targetUrl);
-        if (cacheService.TryGetValue(cacheKey, out ICollection<int>? result)) return result;
+        if (cacheService.TryGetValue(cacheKey, out IReadOnlyCollection<int>? result)) return result;
         result = await searchEngineService.SearchGoogleAsync(keyword, targetUrl);
         cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(CommonConstant.CacheExpireMinute));
         return result;
     }
 
-    private async Task<ICollection<int>?> GetBingResultAsync(string keyword, string targetUrl)
+    private async Task<IReadOnlyCollection<int>?> GetBingResultAsync(string keyword, string targetUrl)
     {
         var cacheKey = string.Format(CommonConstant.CacheKeyFormat, SearchEngineType.Bing, keyword, targetUrl);
-        if (cacheService.TryGetValue(cacheKey, out ICollection<int>? result)) return result;
+        if (cacheService.TryGetValue(cacheKey, out IReadOnlyCollection<int>? result)) return result;
         result = await searchEngineService.SearchBingAsync(keyword, targetUrl, 25);
         cacheService.Set(cacheKey, result, TimeSpan.FromMinutes(CommonConstant.CacheExpireMinute));
         return result;
@@ -75,7 +75,7 @@ public class SearchEngineQueryHandler(
     /// <returns>
     ///     The minimum ranking value if available; otherwise, null.
     /// </returns>
-    private static string FindRank(ICollection<int>? searchResults)
+    private static string FindRank(IReadOnlyCollection<int>? searchResults)
     {
         return searchResults?.Any() == true ? string.Join(", ", searchResults) : "0";
     }

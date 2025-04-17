@@ -1,13 +1,12 @@
 using Microsoft.Extensions.Logging;
 using SearchRank.Domain.Constants;
 using SearchRank.Domain.Interfaces;
-using SearchRank.Infrastructure.Extensions;
 
 namespace SearchRank.Infrastructure.Services;
 
-public class SearchEngineService(ILogger<SearchEngineService> logger) : ISearchEngineService
+public class SearchEngineService(IHtmlFinder htmlFinder, ILogger<SearchEngineService> logger) : ISearchEngineService
 {
-    public async Task<ICollection<int>> SearchBingAsync(string keyword, string url, int resultsPerPage)
+    public async Task<IReadOnlyCollection<int>> SearchBingAsync(string keyword, string url, int resultsPerPage)
     {
         var result = new List<int>();
         var totalPages = CommonConstant.MaxTotalResults / resultsPerPage;
@@ -19,19 +18,19 @@ public class SearchEngineService(ILogger<SearchEngineService> logger) : ISearchE
             var htmlContent = await SearchAsync(queryUrl);
             if (string.IsNullOrEmpty(htmlContent)) continue;
 
-            var pagePositions = HtmlExtension.FindUrlPositionsForBing(htmlContent, url);
+            var pagePositions = htmlFinder.FindUrlPositionsForBing(htmlContent, url);
             result.AddRange(pagePositions.Select(p => p + offset - 1));
         }
 
         return result;
     }
 
-    public async Task<ICollection<int>> SearchGoogleAsync(string keyword, string url)
+    public async Task<IReadOnlyCollection<int>> SearchGoogleAsync(string keyword, string url)
     {
         var queryUrl =
             $"{CommonConstant.GoogleUrl}?q={Uri.EscapeDataString(keyword)}&num={CommonConstant.MaxTotalResults}";
         var htmlContent = await SearchAsync(queryUrl);
-        return string.IsNullOrEmpty(htmlContent) ? [] : HtmlExtension.FindUrlPositionsForGoogle(htmlContent, url);
+        return string.IsNullOrEmpty(htmlContent) ? [] : htmlFinder.FindUrlPositionsForGoogle(htmlContent, url);
     }
 
     #region Private Method(s)

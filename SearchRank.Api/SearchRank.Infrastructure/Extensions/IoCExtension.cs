@@ -19,5 +19,6 @@ public static class IoCExtension
         services.AddTransient<IPasswordGenerator, PasswordGenerator>();
         services.AddScoped<ICacheService, MemoryCacheService>();
         services.AddTransient<ISearchEngineService, SearchEngineService>();
+        services.AddSingleton<IHtmlFinder, HtmlFinder>();
     }
 }

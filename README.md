@@ -42,7 +42,7 @@ This is a Clean‑Architecture‑based .NET 9 Minimal API that powers an SEO‑
 
 ## Testing Credential
 ```bash
-  curl --location 'https://localhost:7274/api/token' \
+  curl --location 'https://localhost:{PORT}/api/token' \
     --header 'accept: */*' \
     --header 'Content-Type: application/json' \
     --data-raw '{

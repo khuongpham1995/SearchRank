@@ -14,7 +14,7 @@ public interface ISearchEngineService
     ///     of integers representing the ranking positions (1-indexed) at which the target URL appears
     ///     in the Bing search results.
     /// </returns>
-    Task<ICollection<int>> SearchBingAsync(string keyword, string url, int resultsPerPage);
+    Task<IReadOnlyCollection<int>> SearchBingAsync(string keyword, string url, int resultsPerPage);
 
     /// <summary>
     ///     Executes a search query on Google with the specified keyword and target URL,
@@ -27,5 +27,5 @@ public interface ISearchEngineService
     ///     of integers representing the ranking positions (1-indexed) at which the target URL appears
     ///     in the Google search results.
     /// </returns>
-    Task<ICollection<int>> SearchGoogleAsync(string keyword, string url);
+    Task<IReadOnlyCollection<int>> SearchGoogleAsync(string keyword, string url);
 }

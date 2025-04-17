@@ -1,18 +1,17 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
+using SearchRank.Domain.Interfaces;
 
-namespace SearchRank.Infrastructure.Extensions;
+namespace SearchRank.Infrastructure.Services;
 
-internal static partial class HtmlExtension
+public partial class HtmlFinder : IHtmlFinder
 {
     private const string GooglePattern = @"<div class=""BNeawe UPmit AP7Wnd.*?"">(.*?)<\/div>";
     private const string BingPattern = @"<li class=""b_algo.*?"">(.*?)<\/li>";
-
     private const string CiteTagPattern =
         @"<div[^>]*class=[""']notranslate[^""']*[""'][^>]*>.*?<cite[^>]*>(.*?)<\/cite>";
-
     private const string RegexPattern = @"href=""(https?:\/\/[^""]+)""";
 
-    public static List<int> FindUrlPositionsForGoogle(string htmlContent, string targetUrl)
+    public IReadOnlyCollection<int> FindUrlPositionsForGoogle(string htmlContent, string targetUrl)
     {
         var positions = new List<int>();
         var matches = GetRegexMatches(htmlContent, GooglePattern);
@@ -31,7 +30,7 @@ internal static partial class HtmlExtension
         return positions;
     }
 
-    public static List<int> FindUrlPositionsForBing(string htmlContent, string targetUrl)
+    public IReadOnlyCollection<int> FindUrlPositionsForBing(string htmlContent, string targetUrl)
     {
         var positions = new List<int>();
         var matches = GetRegexMatches(htmlContent, BingPattern);
@@ -60,7 +59,6 @@ internal static partial class HtmlExtension
     {
         var regex = ExtractHrefRegex();
         var match = regex.Match(htmlContent);
-
         return match is { Success: true, Groups.Count: > 1 } ? NormalizeUrl(match.Groups[1].Value) : null;
     }
 

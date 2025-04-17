@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchRank.Infrastructure",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchRank.Application", "SearchRank.Application\SearchRank.Application.csproj", "{20395745-2A63-4AF3-BF70-3941D89A102E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchRank.Application.UnitTest", "SearchRank.Application.UnitTest\SearchRank.Application.UnitTest.csproj", "{A5D2EAA7-5713-4E2B-96B5-DFF505505475}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchRank.UnitTest", "SearchRank.UnitTest\SearchRank.UnitTest.csproj", "{A5D2EAA7-5713-4E2B-96B5-DFF505505475}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
