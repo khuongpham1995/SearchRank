@@ -32,30 +32,19 @@ public class SearchEngineQueryHandler(
         logger.LogInformation("Processing search query for keyword: {Keyword}, targetUrl: {TargetUrl}", request.Keyword,
             request.TargetUrl);
 
-        var googleTask = GetGoogleResultAsync(request.Keyword, request.TargetUrl);
-        var bingTask = GetBingResultAsync(request.Keyword, request.TargetUrl);
-        await Task.WhenAll(new List<Task> { googleTask, bingTask });
-        var googleResults = await googleTask;
-        var bingResults = await bingTask;
-
-        logger.LogInformation("Retrieved {GoogleCount} results from Google and {BingCount} results from Bing.",
-            googleResults?.Count, bingResults?.Count);
-
-        var googleRank = FindRank(googleResults);
-        var bingRank = FindRank(bingResults);
-
-        logger.LogInformation("Search rank determined. Google: {GoogleRank}, Bing: {BingRank}", googleRank, bingRank);
-
+        var result = request.SearchEngineType switch
+        {
+            SearchEngineType.Google => await GetGoogleResultAsync(request.Keyword, request.TargetUrl),
+            SearchEngineType.Bing => await GetBingResultAsync(request.Keyword, request.TargetUrl),
+            _ => throw new ArgumentOutOfRangeException(nameof(request.SearchEngineType), "Invalid search engine type")
+        };
+        logger.LogInformation("Retrieved {Count} results from {SearchEngine}.", result?.Count, request.SearchEngineType.ToString());
         return new SearchEngineQuery.ResultModel
         {
             Keyword = request.Keyword,
             TargetUrl = request.TargetUrl,
             Timestamp = DateTimeOffset.Now,
-            Results =
-            [
-                new Domain.Models.SearchEngine { Type = SearchEngineType.Google, Rank = googleRank },
-                new Domain.Models.SearchEngine { Type = SearchEngineType.Bing, Rank = bingRank }
-            ]
+            Result = new Domain.Models.SearchEngine { Type = request.SearchEngineType, Rank = FindRank(result) }
         };
     }
 

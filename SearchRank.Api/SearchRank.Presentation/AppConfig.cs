@@ -26,4 +26,6 @@ public class ApiAction
     public string Grouping { get; set; } = string.Empty;
     public string Token { get; set; } = string.Empty;
     public string Ranking { get; set; } = string.Empty;
+    public string GoogleRank => string.IsNullOrEmpty(Ranking) ? string.Empty : $"/google{Ranking}";
+    public string BingRank => string.IsNullOrEmpty(Ranking) ? string.Empty : $"/bing{Ranking}";
 }

@@ -1,6 +1,0 @@
-@SearchRank.Presentation_HostAddress = http://localhost:5083
-
-GET {{SearchRank.Presentation_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

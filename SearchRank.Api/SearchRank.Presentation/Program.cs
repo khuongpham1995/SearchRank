@@ -6,9 +6,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SearchRank.Application.Extensions;
 using SearchRank.Domain.Constants;
+using SearchRank.Domain.Enums;
 using SearchRank.Infrastructure.Extensions;
 using SearchRank.Infrastructure.Persistence;
 using SearchRank.Presentation;
+using SearchRank.Presentation.Middlewares;
 using SearchRank.Presentation.Requests;
 using SearchRank.Presentation.Responses;
 
@@ -86,6 +88,7 @@ app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/search-rank.json", "v1");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -105,12 +108,23 @@ group.MapPost(appConfig.ApiAction.Token, async (LoginRequest loginRequest, ISend
     .Produces(StatusCodes.Status400BadRequest)
     .RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
 
-group.MapGet(appConfig.ApiAction.Ranking, async ([AsParameters] SearchRequest request, ISender sender) =>
+group.MapGet(appConfig.ApiAction.BingRank, async ([AsParameters] SearchRequest request, ISender sender) =>
     {
-        var response = await sender.Send(request.ToQuery());
+        var response = await sender.Send(request.ToQuery(SearchEngineType.Bing));
         return response.Match(result => Results.Ok(result.ToResponse()), _ => Results.NoContent());
     })
-    .WithTags("Search Engine Ranking")
+    .WithTags("Search Engine")
+    .Produces<SearchResponse>()
+    .Produces(StatusCodes.Status204NoContent)
+    .RequireAuthorization()
+    .RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
+
+group.MapGet(appConfig.ApiAction.GoogleRank, async ([AsParameters] SearchRequest request, ISender sender) =>
+    {
+        var response = await sender.Send(request.ToQuery(SearchEngineType.Google));
+        return response.Match(result => Results.Ok(result.ToResponse()), _ => Results.NoContent());
+    })
+    .WithTags("Search Engine")
     .Produces<SearchResponse>()
     .Produces(StatusCodes.Status204NoContent)
     .RequireAuthorization()
