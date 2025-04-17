@@ -1,0 +1,20 @@
+<nav class="mat-breadcrumb" aria-label="breadcrumb">
+    <ng-container *ngFor="let item of items; let last = last">
+      <ng-container *ngIf="!item.isCurrent && item.url; else current">
+        <button mat-button [routerLink]="item.url" disableRipple>
+          <mat-icon *ngIf="item.icon" class="me-1">{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </button>
+      </ng-container>
+  
+      <ng-template #current>
+        <span class="current">
+          <mat-icon *ngIf="item.icon" class="me-1">{{ item.icon }}</mat-icon>
+          {{ item.label }}
+        </span>
+      </ng-template>
+  
+      <mat-icon class="separator" *ngIf="!last">chevron_right</mat-icon>
+    </ng-container>
+  </nav>
+  

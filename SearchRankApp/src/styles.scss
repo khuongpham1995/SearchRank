@@ -1,0 +1,22 @@
+/* You can add global styles to this file, and also import other style files */
+
+@use '@angular/material' as mat;
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html {
+  color-scheme: light;
+  --box-shadow-color: rgba(0, 0, 0, 0.1);
+  @include mat.theme((
+    color: mat.$rose-palette
+  ));
+}
+
+html.dark-mode {
+    color-scheme: dark;
+    --box-shadow-color: rgba(255, 255, 255, 0.15);
+    @include mat.theme((
+        color: mat.$violet-palette
+    ));
+}

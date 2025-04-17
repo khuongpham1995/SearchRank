@@ -81,6 +81,14 @@ builder.Services.AddRateLimiter(rl => rl
         options.QueueLimit = Convert.ToInt32(appConfig.RateLimiter.QueueLimit);
     }).RejectionStatusCode = StatusCodes.Status429TooManyRequests);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CommonConstant.AllowAngularApp, policy =>
+    {
+        if (appConfig.CorsSettings.AllowedOrigins.Length > 0) policy.WithOrigins(appConfig.CorsSettings.AllowedOrigins).AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -89,6 +97,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseCors(CommonConstant.AllowAngularApp);
 
 using (var scope = app.Services.CreateScope())
 {
@@ -127,6 +136,37 @@ group.MapGet(appConfig.ApiAction.GoogleRank, async ([AsParameters] SearchRequest
     .WithTags("Search Engine")
     .Produces<SearchResponse>()
     .Produces(StatusCodes.Status204NoContent)
+    .RequireAuthorization()
+    .RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
+
+group.MapPost(appConfig.ApiAction.Log, (ServerLogRequest request, ILogger<Program> logger) =>
+     {
+         if (string.IsNullOrWhiteSpace(request.Level) || string.IsNullOrWhiteSpace(request.Message))
+         {
+             return Results.BadRequest("Invalid request.");
+         }
+
+         switch (request.Level.ToLower())
+         {
+             case "info":
+                 logger.LogInformation(request.Message);
+                 break;
+             case "warn":
+                 logger.LogWarning(request.Message);
+                 break;
+             case "error":
+                 logger.LogError(request.Message);
+                 break;
+             default:
+                 logger.LogWarning("Unknown log level, logging: {Message}", request.Message);
+                 return Results.BadRequest($"Unknown log {request.Level}, logging: {request.Message}");
+         }
+
+         return Results.Ok(new { message = "Log recorded successfully" });
+     })
+    .WithTags("Server Log")
+    .Produces(StatusCodes.Status200OK, typeof(object))
+    .Produces(StatusCodes.Status400BadRequest, typeof(string))
     .RequireAuthorization()
     .RequireRateLimiting(CommonConstant.FixedRateLimitingPolicy);
 

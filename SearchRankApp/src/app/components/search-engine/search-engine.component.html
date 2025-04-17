@@ -1,0 +1,80 @@
+<app-breadcrumb
+  [items]="[
+    { label: 'Home', url: '/', icon: 'home' },
+    { label: 'Search Engine', isCurrent: true }
+  ]">
+</app-breadcrumb>
+<mat-card>
+  <mat-card-content>
+    <form (ngSubmit)="onSubmit()" [formGroup]="searchForm" novalidate>
+
+      <!-- Keywords -->
+      <mat-form-field appearance="fill" class="row-field">
+        <mat-label>Keywords</mat-label>
+        <input matInput formControlName="keywords" />
+        <mat-error *ngIf="searchForm.get('keywords')?.hasError('required')">
+          Keywords are required
+        </mat-error>
+      </mat-form-field>
+
+      <!-- URL -->
+      <mat-form-field appearance="fill" class="row-field">
+        <mat-label>URL</mat-label>
+        <input matInput type="url" formControlName="url" />
+        <mat-error *ngIf="searchForm.get('url')?.hasError('required')">
+          URL is required
+        </mat-error>
+        <mat-error *ngIf="searchForm.get('url')?.hasError('pattern')">
+          Enter a valid URL
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Search Engine -->
+      <mat-form-field appearance="fill" class="row-field">
+        <mat-label>Type</mat-label>
+        <mat-select formControlName="searchEngine">
+          <mat-option *ngFor="let engine of searchEngines" [value]="engine.value">
+            {{ engine.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="searchForm.get('searchEngine')?.hasError('required')">
+          Please select a search engine
+        </mat-error>
+      </mat-form-field>
+
+      <div class="button-container">
+        <button mat-raised-button color="warn" type="button" (click)="onReset()">
+          <mat-icon class="me-1">refresh</mat-icon>
+          Refresh
+        </button>
+      
+        <button mat-raised-button color="primary" [disabled]="searchForm.invalid">
+          <mat-icon class="me-1">search</mat-icon>
+          Search
+        </button>
+      </div>
+      
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<!-- Result -->
+<mat-card *ngIf="result" class="result-card">
+  <mat-card-header>
+    <mat-card-title>Results</mat-card-title>
+  </mat-card-header>
+
+  <mat-divider></mat-divider>
+
+  <mat-card-content>
+    <div class="row-field">
+      <strong>Positions:</strong>
+      <ng-container *ngIf="result.rank; else notFound">
+        {{ result.rank }}
+      </ng-container>
+      <ng-template #notFound>
+        <span class="text-muted">Not Found</span>
+      </ng-template>
+    </div>
+  </mat-card-content>
+</mat-card>  

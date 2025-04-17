@@ -1,0 +1,51 @@
+/* Overall container style */
+.sidenav-container {
+  height: 100vh;
+}
+
+/* Side Navigation Styles */
+.sidenav {
+  width: 250px;
+  box-shadow: 0 2px 4px var(--box-shadow-color);
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+}
+
+/* Top Toolbar (sticky) */
+.main-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 2px 4px var(--box-shadow-color);
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1 1 auto;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Footer style */
+.footer {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}

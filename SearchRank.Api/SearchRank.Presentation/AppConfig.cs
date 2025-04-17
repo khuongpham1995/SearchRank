@@ -5,6 +5,7 @@ public class AppConfig
     public ApiAction ApiAction { get; set; } = new();
     public JwtSettings JwtSettings { get; set; } = new();
     public RateLimiterSettings RateLimiter { get; set; } = new();
+    public required CorsSettings CorsSettings { get; set; }
 }
 
 public class JwtSettings
@@ -28,4 +29,10 @@ public class ApiAction
     public string Ranking { get; set; } = string.Empty;
     public string GoogleRank => string.IsNullOrEmpty(Ranking) ? string.Empty : $"/google{Ranking}";
     public string BingRank => string.IsNullOrEmpty(Ranking) ? string.Empty : $"/bing{Ranking}";
+    public string Log { get; set; } = string.Empty;
+}
+
+public class CorsSettings
+{
+    public required string[] AllowedOrigins { get; set; }
 }
