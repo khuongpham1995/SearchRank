@@ -11,7 +11,7 @@ public static class SearchResponseExtensions
 {
     public static SearchResponse ToResponse(this SearchEngineQuery.ResultModel input)
     {
-        return new SearchResponse(input.Keyword, input.TargetUrl, 
+        return new SearchResponse(input.Keyword, input.TargetUrl,
             new SearchEngineResponse(input.Result.Type.GetDisplayName(), input.Result.Rank));
     }
 }

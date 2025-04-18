@@ -1,5 +1,3 @@
-using System.Text;
-using System.Threading.RateLimiting;
 using MediatR;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +11,8 @@ using SearchRank.Presentation;
 using SearchRank.Presentation.Middlewares;
 using SearchRank.Presentation.Requests;
 using SearchRank.Presentation.Responses;
+using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())

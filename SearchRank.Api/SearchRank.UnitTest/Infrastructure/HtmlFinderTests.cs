@@ -1,8 +1,6 @@
 using FluentAssertions;
-using Moq;
 using SearchRank.Domain.Interfaces;
 using SearchRank.Infrastructure.Services;
-using System.Net;
 
 namespace SearchRank.UnitTest.Infrastructure;
 

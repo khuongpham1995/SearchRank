@@ -1,6 +1,5 @@
 using SearchRank.Application.SearchEngine.Queries;
 using SearchRank.Domain.Enums;
-using SearchRank.Domain.Models;
 
 namespace SearchRank.Presentation.Requests;
 

@@ -1,10 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SearchRank.Domain.Entities;
 using SearchRank.Domain.Interfaces;
 using SearchRank.Infrastructure.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace SearchRank.UnitTest.Infrastructure;
 
@@ -41,14 +41,14 @@ public class JwtGeneratorTests
             Id = Guid.NewGuid(),
             Email = "alice@example.com"
         };
-        
+
         // Act
         var tokenString = _generator.GenerateToken(user);
 
         // Assert
         tokenString.Should().NotBeNullOrWhiteSpace("we expect a JWT string back");
         var handler = new JwtSecurityTokenHandler();
-        handler.CanReadToken(tokenString) .Should().BeTrue("the JwtSecurityTokenHandler must accept it");
+        handler.CanReadToken(tokenString).Should().BeTrue("the JwtSecurityTokenHandler must accept it");
         var jwt = handler.ReadJwtToken(tokenString);
         jwt.Issuer.Should().Be(Issuer, "the token must carry the configured issuer");
         jwt.Audiences.Should().ContainSingle().Which.Should().Be(Audience, "the token must carry the configured audience");

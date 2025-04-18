@@ -1,6 +1,5 @@
-using System.Text.RegularExpressions;
-using SearchRank.Domain.Constants;
 using SearchRank.Domain.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace SearchRank.Infrastructure.Services;
 
