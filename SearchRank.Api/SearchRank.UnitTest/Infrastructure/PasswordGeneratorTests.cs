@@ -1,4 +1,5 @@
 using FluentAssertions;
+using SearchRank.Domain.Interfaces;
 using SearchRank.Infrastructure.Services;
 
 namespace SearchRank.UnitTest.Infrastructure;
@@ -6,7 +7,7 @@ namespace SearchRank.UnitTest.Infrastructure;
 [TestClass]
     public class PasswordGeneratorTests
     {
-        private PasswordGenerator _generator = null!;
+        private IPasswordGenerator _generator = null!;
 
         [TestInitialize]
         public void Setup()

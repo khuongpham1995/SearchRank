@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using SearchRank.Domain.Interfaces;
 using SearchRank.Infrastructure.Services;
 
 namespace SearchRank.UnitTest.Infrastructure;
@@ -8,7 +9,7 @@ namespace SearchRank.UnitTest.Infrastructure;
 [TestClass]
 public class MemoryCacheServiceTests
 {
-    private MemoryCacheService _cacheService = null!;
+    private ICacheService _cacheService = null!;
     private Mock<IMemoryCache> _memoryCache = null!;
 
     [TestInitialize]

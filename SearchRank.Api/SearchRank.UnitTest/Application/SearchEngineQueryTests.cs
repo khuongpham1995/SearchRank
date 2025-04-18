@@ -100,10 +100,10 @@ public class SearchEngineQueryTests
             .Setup(x =>
                 x.TryGetValue(
                     It.IsAny<string>(),
-                    out It.Ref<ICollection<int>?>.IsAny
+                    out It.Ref<IReadOnlyCollection<int>?>.IsAny
                 )
             )
-            .Callback((string _, out ICollection<int>? value) => { value = cachedList; })
+            .Callback((string _, out IReadOnlyCollection<int>? value) => { value = cachedList; })
             .Returns(true);
 
         // Act
@@ -127,7 +127,7 @@ public class SearchEngineQueryTests
         var targetUrl = "http://bar.com";
         var request = new SearchEngineQuery(keyword, targetUrl, SearchEngineType.Google);
         var cacheKey = string.Format(CommonConstant.CacheKeyFormat, SearchEngineType.Google, keyword, targetUrl);
-        _cacheService.Setup(x => x.TryGetValue(cacheKey, out It.Ref<ICollection<int>?>.IsAny)).Returns(false);
+        _cacheService.Setup(x => x.TryGetValue(cacheKey, out It.Ref<IReadOnlyCollection<int>?>.IsAny)).Returns(false);
         var returnedList = new List<int> { 7, 8 };
         _searchEngineService.Setup(svc => svc.SearchGoogleAsync(keyword, targetUrl)).ReturnsAsync(returnedList);
 
@@ -141,7 +141,7 @@ public class SearchEngineQueryTests
         _cacheService.Verify(
             c => c.Set(
                 cacheKey,
-                It.Is<ICollection<int>>(col => col.Count == 2 && col.Contains(7) && col.Contains(8)),
+                It.Is<IReadOnlyCollection<int>>(col => col.Count == 2 && col.Contains(7) && col.Contains(8)),
                 TimeSpan.FromMinutes(CommonConstant.CacheExpireMinute)
             ),
             Times.Once);

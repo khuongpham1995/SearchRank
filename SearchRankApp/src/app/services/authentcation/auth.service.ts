@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, tap, map } from 'rxjs';
 import { SearchRankPresentationRequestsLoginRequest } from '../../search-rank-api/models';
 import { BearerTokenService } from '../../search-rank-api/services';
@@ -9,6 +10,7 @@ import { BearerTokenService } from '../../search-rank-api/services';
 export class AuthService {
   private readonly tokenKey: string = 'jwt-token';
   private readonly tokenService = inject(BearerTokenService);
+  private readonly router = inject(Router);
 
   login(params: SearchRankPresentationRequestsLoginRequest): Observable<{ token: string | null }> {
     return this.tokenService.apiTokenPost$Response({ body: params }).pipe(
@@ -23,6 +25,7 @@ export class AuthService {
 
   logout() {
     sessionStorage.removeItem(this.tokenKey);
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {

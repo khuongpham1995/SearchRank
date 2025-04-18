@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using SearchRank.Domain.Constants;
 using SearchRank.Domain.Interfaces;
 
 namespace SearchRank.Infrastructure.Services;
@@ -15,10 +16,8 @@ public partial class HtmlFinder : IHtmlFinder
     {
         var positions = new List<int>();
         var matches = GetRegexMatches(htmlContent, GooglePattern);
-
-        if (matches.Count != 0) targetUrl = NormalizeUrl(targetUrl);
-        else matches = GetRegexMatches(htmlContent, CiteTagPattern);
-
+        if (matches.Count == 0) matches = GetRegexMatches(htmlContent, CiteTagPattern);
+        targetUrl = NormalizeUrl(targetUrl);
         for (var i = 0; i < matches.Count; i++)
         {
             var extractedText = matches[i].Groups[1].Value.Trim();

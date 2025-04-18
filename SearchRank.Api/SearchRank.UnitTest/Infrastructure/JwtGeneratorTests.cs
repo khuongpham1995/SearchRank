@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using SearchRank.Domain.Entities;
+using SearchRank.Domain.Interfaces;
 using SearchRank.Infrastructure.Services;
 
 namespace SearchRank.UnitTest.Infrastructure;
@@ -13,7 +14,7 @@ public class JwtGeneratorTests
     private const string SecretKey = "super-secret-key-which-is-long-enough";
     private const string Issuer = "my-api";
     private const string Audience = "my-clients";
-    private JwtGenerator _generator = null!;
+    private IJwtGenerator _generator = null!;
 
     [TestInitialize]
     public void Setup()

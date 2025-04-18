@@ -4,7 +4,7 @@ using SearchRank.Domain.Interfaces;
 
 namespace SearchRank.Infrastructure.Services;
 
-public class SearchEngineService(IHtmlFinder htmlFinder, ILogger<SearchEngineService> logger) : ISearchEngineService
+public class SearchEngineService(IHttpClientFactory httpClientFactory, IHtmlFinder htmlFinder, ILogger<SearchEngineService> logger) : ISearchEngineService
 {
     public async Task<IReadOnlyCollection<int>> SearchBingAsync(string keyword, string url, int resultsPerPage)
     {
@@ -37,7 +37,7 @@ public class SearchEngineService(IHtmlFinder htmlFinder, ILogger<SearchEngineSer
 
     private async Task<string> SearchAsync(string url)
     {
-        using var httpClient = new HttpClient();
+        using var httpClient = httpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Clear();
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(CommonConstant.UserAgentHeader);
         httpClient.DefaultRequestHeaders.Accept.ParseAdd(CommonConstant.AcceptHeader);
