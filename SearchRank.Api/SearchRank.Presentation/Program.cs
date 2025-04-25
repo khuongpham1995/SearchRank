@@ -92,7 +92,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseSwagger();
-app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/search-rank.json", "v1"); });
+app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"); });
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
