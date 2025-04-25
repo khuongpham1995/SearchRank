@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using OneOf;
-using SearchRank.Application.Extensions;
 using SearchRank.Domain.Interfaces;
 using SearchRank.Domain.Models;
 
@@ -18,13 +17,6 @@ public class LoginUserCommandHandler(
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling LoginUserCommand for Email: {Email}", request.Email);
-
-        if (!ValidationExtension.IsEmailValid(request.Email))
-        {
-            logger.LogWarning("Login attempt failed: Invalid email format for Email: {Email}", request.Email);
-            return new Error("Invalid email address");
-        }
-
         var user = await repository.GetUserByEmailAsync(request.Email);
         if (user is null)
         {
